@@ -33,7 +33,7 @@ class ActivityNewTask : AppCompatActivity() {
     private lateinit var dateInput : TextView
     private val calendar = Calendar.getInstance()
     private var selectedDateTime: LocalDateTime? = null
-
+    private var currentDateTime: LocalDateTime? = null
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +52,10 @@ class ActivityNewTask : AppCompatActivity() {
             showMaterialDatePicker()
 
         }
+
+        currentDateTime=LocalDateTime.now()
+        updateSelectedDateTextView(currentDateTime!!)
+
     }
 
 
@@ -90,15 +94,15 @@ class ActivityNewTask : AppCompatActivity() {
                 .toLocalDate()
 
             selectedDateTime = LocalDateTime.of(selectedDate, java.time.LocalTime.of(selectedHour, selectedMinute))
-            updateSelectedDateTextView()
+            updateSelectedDateTextView(selectedDateTime!!)
         }
 
         timePicker.show(supportFragmentManager, "TIME_PICKER")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateSelectedDateTextView() {
-        selectedDateTime?.let {
+    private fun updateSelectedDateTextView(chosenDateTime: LocalDateTime) {
+        chosenDateTime.let {
             val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.getDefault())
             dateInput.text = it.format(formatter)
         }
