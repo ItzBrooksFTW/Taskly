@@ -6,7 +6,7 @@
     android:padding="10dp">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
@@ -35,5 +35,6 @@
         android:id="@+id/buttonDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Delete" />
+        android:text="Delete"
+        android:textAlignment="center" />
 </LinearLayout>

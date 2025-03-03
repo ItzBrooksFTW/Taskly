@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -18,11 +19,14 @@ import com.example.taskly.data.Task
 
 import com.example.taskly.utils.TaskStorage
 import com.example.taskly.utils.switchScreens
+import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -31,12 +35,11 @@ import java.util.Locale
 class ActivityNewTask : AppCompatActivity() {
 
     private lateinit var dateInput : TextView
-    private val calendar = Calendar.getInstance()
     private var selectedDateTime: LocalDateTime? = null
     private var currentDateTime: LocalDateTime? = null
     private lateinit var taskStorage: TaskStorage
     private var taskList: MutableList<Task> = mutableListOf()
-    @RequiresApi(Build.VERSION_CODES.O)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -71,8 +74,9 @@ class ActivityNewTask : AppCompatActivity() {
 
 
 
-        currentDateTime=LocalDateTime.now()
+        currentDateTime=LocalDateTime.now().plus(5, java.time.temporal.ChronoUnit.MINUTES)
         updateSelectedDateTextView(currentDateTime!!)
+        selectedDateTime=currentDateTime
 
        ArrayAdapter.createFromResource(
             this,
@@ -85,10 +89,11 @@ class ActivityNewTask : AppCompatActivity() {
 
         buttonSubmit.setOnClickListener(){
 
-            val title = findViewById<TextView>(R.id.titleInput).text.toString()
-            val description = findViewById<TextView>(R.id.descInput).text.toString()
+            if(findViewById<TextView>(R.id.titleInput).text.toString().isNotBlank() && selectedDateTime != null){
+            val title = findViewById<TextView>(R.id.titleInput).text.toString().trim()
+            val description = findViewById<TextView>(R.id.descInput).text.toString().trim()
             val priority = spinner.selectedItem.toString()
-            if (selectedDateTime != null) {
+
                 val task = Task.fromLocalDateTime(title, description, selectedDateTime!!, priority)
                 taskList.add(task)
                 taskStorage.saveTasks(taskList)
@@ -97,32 +102,45 @@ class ActivityNewTask : AppCompatActivity() {
                 switchScreens(this, ActivityAllTasks::class.java, true, bundle)
             } else {
                 Log.e("ActivityNewTask", "selectedDateTime is null")
+                Toast.makeText(this, "Unesite naslov i datum", Toast.LENGTH_SHORT).show()
             }
         }
 
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
+
     private fun showMaterialDatePicker() {
+        val today = MaterialDatePicker.todayInUtcMilliseconds()
+        val constraintsBuilder = CalendarConstraints.Builder()
+            .setStart(today)
+
+
+
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setTitleText("Izaberi datum")
-            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .setSelection(today)
+            .setCalendarConstraints(constraintsBuilder.build())
             .build()
 
         datePicker.addOnPositiveButtonClickListener { selection ->
-            calendar.timeInMillis = selection
-            showMaterialTimePicker(calendar)
+            val selectedDate = Instant.ofEpochMilli(selection)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+            showMaterialTimePicker(selectedDate)
         }
 
         datePicker.show(supportFragmentManager, "DATE_PICKER")
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun showMaterialTimePicker(calendar: Calendar) {
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
+
+    private fun showMaterialTimePicker(selectedDate: LocalDate) {
+
+
+        val currentTime = LocalDateTime.now().plusMinutes(5)
+        val hour = currentTime.hour
+        val minute = currentTime.minute
 
         val timePicker = MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_24H)
@@ -136,18 +154,22 @@ class ActivityNewTask : AppCompatActivity() {
             val selectedHour = timePicker.hour
             val selectedMinute = timePicker.minute
 
-            val selectedDate = Instant.ofEpochMilli(calendar.timeInMillis)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate()
+            val selectedTime= LocalTime.of(selectedHour, selectedMinute)
 
-            selectedDateTime = LocalDateTime.of(selectedDate, java.time.LocalTime.of(selectedHour, selectedMinute))
-            updateSelectedDateTextView(selectedDateTime!!)
+
+
+            if (selectedTime.isAfter(LocalTime.now()) && selectedDate.isAfter(LocalDate.now())) {
+                selectedDateTime = LocalDateTime.of(selectedDate, selectedTime)
+                updateSelectedDateTextView(selectedDateTime!!)
+            } else {
+                Toast.makeText(this, "Odaberite buduće vrijeme", Toast.LENGTH_SHORT).show()
+            }
         }
 
         timePicker.show(supportFragmentManager, "TIME_PICKER")
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+
     private fun updateSelectedDateTextView(chosenDateTime: LocalDateTime) {
         chosenDateTime.let {
             val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.getDefault())
