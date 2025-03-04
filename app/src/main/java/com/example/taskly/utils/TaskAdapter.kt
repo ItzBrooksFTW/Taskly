@@ -1,8 +1,10 @@
 package com.example.taskly.utils
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -10,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import com.example.taskly.ActivityNewTask
 
 import com.example.taskly.data.Task
 import com.example.taskly.R
@@ -27,15 +30,22 @@ class TaskAdapter(private val context: Context, private val taskList: MutableLis
         val textViewTaskDate = view.findViewById<TextView>(R.id.textViewTaskDate)
         val checkBoxComplete = view.findViewById<CheckBox>(R.id.checkBoxComplete)
         val buttonDelete = view.findViewById<Button>(R.id.buttonDelete)
-        val date=formatDateTime(LocalDateTime.parse(task.date), "dd.MM.yyyy  HH:mm")
+        val buttonEdit = view.findViewById<Button>(R.id.buttonEdit)
+        val date=formatDateTime(LocalDateTime.parse(task.date), "dd.MM.yyyy HH:mm")
         textViewTaskTitle.text = task.title
         textViewTaskDate.text = date
-
+        checkBoxComplete.isChecked = task.isComplete
         checkBoxComplete.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 textViewTaskTitle.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray))
+                task.isComplete=true
+                taskStorage.saveTasks(taskList)
+                Log.d("ActivityNewTaskEdit", "Loaded tasks: $taskList")
             } else {
                 textViewTaskTitle.setTextColor(ContextCompat.getColor(context, android.R.color.black))
+                task.isComplete=false
+                taskStorage.saveTasks(taskList)
+                Log.d("ActivityNewTaskEdit", "Loaded tasks: $taskList")
             }
         }
 
@@ -43,6 +53,14 @@ class TaskAdapter(private val context: Context, private val taskList: MutableLis
             taskList.removeAt(position)
             taskStorage.saveTasks(taskList)
             notifyDataSetChanged()
+        }
+
+        buttonEdit.setOnClickListener {
+
+            val intent = Intent(context, ActivityNewTask::class.java)
+            intent.putExtra("task", task)
+            intent.putExtra("position", position)
+            context.startActivity(intent)
         }
 
         view.setOnClickListener {

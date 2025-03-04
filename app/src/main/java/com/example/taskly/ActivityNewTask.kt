@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.taskly.data.Task
 
 import com.example.taskly.utils.TaskStorage
+import com.example.taskly.utils.formatDateTime
 import com.example.taskly.utils.switchScreens
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -39,6 +40,8 @@ class ActivityNewTask : AppCompatActivity() {
     private var currentDateTime: LocalDateTime? = null
     private lateinit var taskStorage: TaskStorage
     private var taskList: MutableList<Task> = mutableListOf()
+    private var taskToEdit: Task? = null  //sluzi da se provjeri je li se ureduje zadatak ili samo stvara novi
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,11 +52,10 @@ class ActivityNewTask : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val buttonBack: Button = findViewById(R.id.buttonBack)
-        buttonBack.setOnClickListener {
 
-            switchScreens(this, MainActivity::class.java, true, null)
-        }
+
+
+
 
         taskStorage = TaskStorage(this)
         taskList = taskStorage.loadTasks().toMutableList()
@@ -87,22 +89,51 @@ class ActivityNewTask : AppCompatActivity() {
             spinner.adapter = adapter
         }
 
+        taskToEdit = intent.getSerializableExtra("task") as? Task
+        val position = intent.getIntExtra("position", -1)
+        taskToEdit?.let { task ->
+            findViewById<TextView>(R.id.activityTitle).text= "Uredi zadatak"
+            findViewById<TextView>(R.id.titleInput).text = task.title
+            findViewById<TextView>(R.id.descInput).text = task.description
+            selectedDateTime = LocalDateTime.parse(task.date)
+            updateSelectedDateTextView(selectedDateTime!!)
+            val priorityPosition = resources.getStringArray(R.array.dropdown_values).indexOf(task.priority)
+            spinner.setSelection(priorityPosition)
+            buttonSubmit.text = "Ažuriraj zadatak"
+        }
+
         buttonSubmit.setOnClickListener(){
 
-            if(findViewById<TextView>(R.id.titleInput).text.toString().isNotBlank() && selectedDateTime != null){
-            val title = findViewById<TextView>(R.id.titleInput).text.toString().trim()
-            val description = findViewById<TextView>(R.id.descInput).text.toString().trim()
-            val priority = spinner.selectedItem.toString()
+            if (findViewById<TextView>(R.id.titleInput).text.toString().isNotBlank() && selectedDateTime != null) {
+                val title = findViewById<TextView>(R.id.titleInput).text.toString().trim()
+                val description = findViewById<TextView>(R.id.descInput).text.toString().trim()
+                val priority = spinner.selectedItem.toString()
 
-                val task = Task.fromLocalDateTime(title, description, selectedDateTime!!, priority)
-                taskList.add(task)
+                if (taskToEdit != null && position != -1) {
+
+                    taskToEdit=Task.fromLocalDateTime(title, description, selectedDateTime!!, priority, taskToEdit!!.isComplete, LocalDateTime.now().toString())
+
+                    taskList[position] = taskToEdit!!
+                    Log.d("ActivityNewTaskEdit", "Loaded tasks: $taskList")
+                } else {
+
+                    val task = Task.fromLocalDateTime(title, description, selectedDateTime!!, priority, false, "")
+                    taskList.add(task)
+                }
+
                 taskStorage.saveTasks(taskList)
-                val bundle = Bundle()
-                bundle.putSerializable("task", task)
-                switchScreens(this, ActivityAllTasks::class.java, true, bundle)
+                switchScreens(this, ActivityAllTasks::class.java, true, null)
             } else {
-                Log.e("ActivityNewTask", "selectedDateTime is null")
                 Toast.makeText(this, "Unesite naslov i datum", Toast.LENGTH_SHORT).show()
+            }
+        }
+        //gumb nazad
+        val buttonBack: Button = findViewById(R.id.buttonBack)
+        buttonBack.setOnClickListener {
+            if(taskToEdit != null) {  //ako se ureduje zadatak onda se vraca na all tasks
+                switchScreens(this, ActivityAllTasks::class.java, true, null)
+            } else {
+                switchScreens(this, MainActivity::class.java, true, null)
             }
         }
 

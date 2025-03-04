@@ -40,3 +40,5 @@ class MainActivity : AppCompatActivity() {
 
     }
 }
+
+//TODO -uređivanje, obavijest, sortiranje, promjena teme
