@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!(getSystemService(Context.ALARM_SERVICE) as AlarmManager).canScheduleExactAlarms()) {
 
-                Toast.makeText(this, "Exact alarm permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Dozvola za alarm odbijena", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     ) { isGranted: Boolean ->
         if (!isGranted) {
 
-            Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Dozvola za notifikaciju odbijena", Toast.LENGTH_SHORT).show()
         }
     }
 
