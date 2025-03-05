@@ -2,6 +2,12 @@ package com.example.taskly
 
 
 
+
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -11,14 +17,11 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.taskly.data.Task
-
 import com.example.taskly.utils.TaskStorage
-import com.example.taskly.utils.formatDateTime
 import com.example.taskly.utils.switchScreens
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -30,7 +33,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
 import java.util.Locale
 
 class ActivityNewTask : AppCompatActivity() {
@@ -41,6 +43,7 @@ class ActivityNewTask : AppCompatActivity() {
     private lateinit var taskStorage: TaskStorage
     private var taskList: MutableList<Task> = mutableListOf()
     private var taskToEdit: Task? = null  //sluzi da se provjeri je li se ureduje zadatak ili samo stvara novi
+    private var taskToSchedule: Task? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +64,7 @@ class ActivityNewTask : AppCompatActivity() {
         taskList = taskStorage.loadTasks().toMutableList()
 
         Log.d("ActivityNewTask", "Loaded tasks: $taskList")
+
 
         val spinner: Spinner = findViewById(R.id.spinner)
 
@@ -114,13 +118,16 @@ class ActivityNewTask : AppCompatActivity() {
                     taskToEdit=Task.fromLocalDateTime(title, description, selectedDateTime!!, priority, taskToEdit!!.isComplete, LocalDateTime.now().toString())
 
                     taskList[position] = taskToEdit!!
+                    taskToSchedule=taskToEdit
                     Log.d("ActivityNewTaskEdit", "Loaded tasks: $taskList")
                 } else {
 
                     val task = Task.fromLocalDateTime(title, description, selectedDateTime!!, priority, false, "")
                     taskList.add(task)
-                }
 
+                    taskToSchedule=task
+                }
+                taskToSchedule?.let { scheduleNotification(it) }
                 taskStorage.saveTasks(taskList)
                 switchScreens(this, ActivityAllTasks::class.java, true, null)
             } else {
@@ -189,10 +196,13 @@ class ActivityNewTask : AppCompatActivity() {
 
 
 
-            if (selectedTime.isAfter(LocalTime.now()) && selectedDate.isAfter(LocalDate.now())) {
+           if (LocalDateTime.of(selectedDate, selectedTime).isAfter(LocalDateTime.now())) {
                 selectedDateTime = LocalDateTime.of(selectedDate, selectedTime)
+               Log.d("ActivityNewTask", "$selectedDate $selectedTime")
                 updateSelectedDateTextView(selectedDateTime!!)
+
             } else {
+                Log.d("ActivityNewTask", "$selectedDate $selectedTime")
                 Toast.makeText(this, "Odaberite buduće vrijeme", Toast.LENGTH_SHORT).show()
             }
         }
@@ -208,5 +218,35 @@ class ActivityNewTask : AppCompatActivity() {
         }
     }
 
+
+
+    private fun scheduleNotification(task: Task) {
+
+
+        val intent = Intent(this, NotificationReceiver::class.java).apply {
+            putExtra("title", task.title)
+            putExtra("date", task.date)
+            putExtra("id", task.id)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            task.id.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val triggerAtMillis =
+            task.getLocalDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            }
+        } catch (e: SecurityException) {
+            Log.e("ActivityNewTask", "Cannot schedule exact alarms: ${e.message}")
+        }
+    }
 
 }

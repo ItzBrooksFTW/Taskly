@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter
 
 @Serializable
 data class Task(
+    val id: String = java.util.UUID.randomUUID().toString(),
     var title: String,
     var description: String,
     var date: String,
@@ -19,14 +20,21 @@ data class Task(
 
     fun getLocalDateTime(): LocalDateTime {
         return LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-    }
 
+    }
 
 
     companion object {
 
         fun fromLocalDateTime(title: String, description: String, date: LocalDateTime, priority: String, isComplete: Boolean, dateChanged: String): Task {
-            return Task(title, description, date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), priority, isComplete, dateChanged)
+            return Task(
+                title = title,
+                description = description,
+                date = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                priority = priority,
+                isComplete = isComplete,
+                dateChanged = dateChanged
+            )
         }
     }
 }
