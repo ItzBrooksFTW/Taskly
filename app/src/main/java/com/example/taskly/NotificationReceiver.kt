@@ -12,19 +12,22 @@ import androidx.core.app.NotificationCompat
 import com.example.taskly.utils.formatDateTime
 import java.time.LocalDateTime
 import com.example.taskly.utils.TaskStorage
+import android.util.Log
 
 class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val title = intent.getStringExtra("title")
-       val date = formatDateTime(LocalDateTime.parse(intent.getStringExtra("date")), "dd.MM.yyyy HH:mm")
+
 
         //provjerava ako je zadatak izvrsen, ako je onda ne salje notifikaciju
         val id = intent.getStringExtra("id")
         val taskList = TaskStorage(context).loadTasks()
 
         val task = taskList.find { it.id == id } ?: return
-
+        Log.d("provjera2", "postoji notifikacija")
         if(task.isComplete) return
+
+        val title = task.title
+        val date = formatDateTime(LocalDateTime.parse(task.date))
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "task_channel"

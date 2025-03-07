@@ -1,20 +1,17 @@
 package com.example.taskly.utils
 
 import android.app.Activity
-import android.content.Context
-
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.View
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import com.example.taskly.R
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.core.graphics.toColorInt
 
 
 fun switchScreens(
@@ -43,14 +40,14 @@ fun changeBackgroundColor(
 
 
     val background = ContextCompat.getDrawable(activity.context, R.drawable.rounded_border)?.mutate() as? GradientDrawable
-    background?.setColor(Color.parseColor(color))
+    background?.setColor(color.toColorInt())
     activity.background = background
 }
 
 fun formatDateTime(
-    dateTime: LocalDateTime,
-    pattern: String
+    dateTime: LocalDateTime
 ): String {
+    val pattern="dd.MM.yyyy HH:mm"
     val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
     return dateTime.format(formatter)
 }

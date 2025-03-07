@@ -8,7 +8,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
@@ -42,7 +41,8 @@ class ActivityNewTask : AppCompatActivity() {
     private var currentDateTime: LocalDateTime? = null
     private lateinit var taskStorage: TaskStorage
     private var taskList: MutableList<Task> = mutableListOf()
-    private var taskToEdit: Task? = null  //sluzi da se provjeri je li se ureduje zadatak ili samo stvara novi
+    private var taskToEditID: String? = null  //sluzi da se provjeri je li se ureduje zadatak ili samo stvara novi
+    private var taskToEdit: Task? = null
     private var taskToSchedule: Task? = null
 
 
@@ -66,7 +66,7 @@ class ActivityNewTask : AppCompatActivity() {
         Log.d("ActivityNewTask", "Loaded tasks: $taskList")
 
 
-        val spinner: Spinner = findViewById(R.id.spinner)
+        val spinner: Spinner = findViewById(R.id.spinnerPriority)
 
         val buttonSubmit : Button=findViewById(R.id.buttonSubmit)
 
@@ -86,22 +86,22 @@ class ActivityNewTask : AppCompatActivity() {
 
        ArrayAdapter.createFromResource(
             this,
-            R.array.dropdown_values,
+            R.array.dropdown_values_priority,
             android.R.layout.simple_spinner_item
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinner.adapter = adapter
         }
 
-        taskToEdit = intent.getSerializableExtra("task") as? Task
-        val position = intent.getIntExtra("position", -1)
+        taskToEditID = intent.getStringExtra("taskID")
+        taskToEdit = taskList.find { it.id == taskToEditID }
         taskToEdit?.let { task ->
             findViewById<TextView>(R.id.activityTitle).text= "Uredi zadatak"
             findViewById<TextView>(R.id.titleInput).text = task.title
             findViewById<TextView>(R.id.descInput).text = task.description
             selectedDateTime = LocalDateTime.parse(task.date)
             updateSelectedDateTextView(selectedDateTime!!)
-            val priorityPosition = resources.getStringArray(R.array.dropdown_values).indexOf(task.priority)
+            val priorityPosition = resources.getStringArray(R.array.dropdown_values_priority).indexOf(task.priority)
             spinner.setSelection(priorityPosition)
             buttonSubmit.text = "Ažuriraj zadatak"
         }
@@ -112,17 +112,25 @@ class ActivityNewTask : AppCompatActivity() {
                 val title = findViewById<TextView>(R.id.titleInput).text.toString().trim()
                 val description = findViewById<TextView>(R.id.descInput).text.toString().trim()
                 val priority = spinner.selectedItem.toString()
+                if (taskToEdit != null) {
 
-                if (taskToEdit != null && position != -1) {
+                    taskToEdit!!.title = title
+                    taskToEdit!!.description = description
+                    taskToEdit!!.date = selectedDateTime!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    taskToEdit!!.priority = priority
+                    taskToEdit!!.dateChanged = LocalDateTime.now().toString()
 
-                    taskToEdit=Task.fromLocalDateTime(title, description, selectedDateTime!!, priority, taskToEdit!!.isComplete, LocalDateTime.now().toString())
-
-                    taskList[position] = taskToEdit!!
+                    Log.d("provjera", "${taskToEdit!!.id}\n$taskToEditID")
+                    val position = taskList.indexOfFirst { it.id == taskToEditID }
+                    if(position != -1) {
+                        taskList[position] = taskToEdit!!
+                        Log.d("ActivityNewTaskEdit2", "Postoji")
+                    }
                     taskToSchedule=taskToEdit
                     Log.d("ActivityNewTaskEdit", "Loaded tasks: $taskList")
                 } else {
 
-                    val task = Task.fromLocalDateTime(title, description, selectedDateTime!!, priority, false, "")
+                    val task = Task.createTask(title, description, selectedDateTime!!, priority, false, "")
                     taskList.add(task)
 
                     taskToSchedule=task
@@ -149,23 +157,33 @@ class ActivityNewTask : AppCompatActivity() {
 
 
     private fun showMaterialDatePicker() {
+        val dateSelection: Long
+
         val today = MaterialDatePicker.todayInUtcMilliseconds()
+        if(taskToEdit==null){
+            dateSelection=today
+
+        }
+        else{
+            dateSelection=LocalDateTime.parse(taskToEdit!!.date).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        }
         val constraintsBuilder = CalendarConstraints.Builder()
             .setStart(today)
 
 
 
-        val datePicker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText("Izaberi datum")
-            .setSelection(today)
-            .setCalendarConstraints(constraintsBuilder.build())
-            .build()
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Izaberi datum")
+                .setSelection(dateSelection)
+                .setCalendarConstraints(constraintsBuilder.build())
+                .build()
 
         datePicker.addOnPositiveButtonClickListener { selection ->
             val selectedDate = Instant.ofEpochMilli(selection)
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate()
             showMaterialTimePicker(selectedDate)
+
         }
 
         datePicker.show(supportFragmentManager, "DATE_PICKER")
@@ -174,11 +192,17 @@ class ActivityNewTask : AppCompatActivity() {
 
 
     private fun showMaterialTimePicker(selectedDate: LocalDate) {
+        val timeSelection: LocalDateTime
+        if(taskToEdit==null){ //ako se stvara novi zadatak
+            timeSelection = LocalDateTime.now().plusMinutes(5)
+        }
+        else{ //ako se ureduje zadatak
+            timeSelection = LocalDateTime.parse(taskToEdit!!.date)
+        }
 
 
-        val currentTime = LocalDateTime.now().plusMinutes(5)
-        val hour = currentTime.hour
-        val minute = currentTime.minute
+        val hour = timeSelection.hour
+        val minute = timeSelection.minute
 
         val timePicker = MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_24H)
@@ -224,8 +248,6 @@ class ActivityNewTask : AppCompatActivity() {
 
 
         val intent = Intent(this, NotificationReceiver::class.java).apply {
-            putExtra("title", task.title)
-            putExtra("date", task.date)
             putExtra("id", task.id)
         }
 
@@ -241,9 +263,7 @@ class ActivityNewTask : AppCompatActivity() {
 
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
-            }
         } catch (e: SecurityException) {
             Log.e("ActivityNewTask", "Cannot schedule exact alarms: ${e.message}")
         }

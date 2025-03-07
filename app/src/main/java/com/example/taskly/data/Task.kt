@@ -13,8 +13,8 @@ data class Task(
     var description: String,
     var date: String,
     var priority: String,
-    var isComplete: Boolean = false,
-    var dateChanged: String = ""
+    var isComplete: Boolean= false,
+    var dateChanged: String= ""
 ) : java.io.Serializable {
 
     fun getLocalDateTime(): LocalDateTime {
@@ -25,7 +25,7 @@ data class Task(
 
     companion object {
 
-        fun fromLocalDateTime(title: String, description: String, date: LocalDateTime, priority: String, isComplete: Boolean, dateChanged: String): Task {
+        fun createTask(title: String, description: String, date: LocalDateTime, priority: String, isComplete: Boolean, dateChanged: String): Task {
             return Task(
                 title = title,
                 description = description,

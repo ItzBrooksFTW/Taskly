@@ -1,12 +1,17 @@
 <resources>
     <string name="app_name">Taskly</string>
-    <string name="new_task" translatable="true">Novi zadatak</string>
-    <string name="all_tasks" translatable="true">Svi zadatci</string>
-    <string name="create_task" translatable="true">Stvori zadatak</string>
+    <string name="new_task">Novi Zadatak</string>
+    <string name="all_tasks" translatable="true">Svi Zadatci</string>
+    <string name="create_task" translatable="true">Stvori Zadatak</string>
     <string name="back">Nazad</string>
-    <string-array name="dropdown_values">
+    <string-array name="dropdown_values_priority">
         <item>Visoki</item>
         <item>Srednji</item>
         <item>Niski</item>
+    </string-array>
+    <string-array name="dropdown_values_sort">
+        <item>Sortiraj po (Zadano)</item>
+        <item>Po datumu</item>
+        <item>Po prioritetu</item>
     </string-array>
 </resources>

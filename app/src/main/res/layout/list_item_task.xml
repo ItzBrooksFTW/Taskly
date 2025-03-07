@@ -19,6 +19,11 @@
             android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/textViewTaskPriority"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
             android:id="@+id/textViewTaskDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,16 +44,16 @@
 
         <Button
             android:id="@+id/buttonEdit"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="Edit"
+            android:text="Izmijeni"
             android:textAlignment="center" />
 
         <Button
             android:id="@+id/buttonDelete"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="Delete"
+            android:text="Izbriši"
             android:textAlignment="center" />
     </LinearLayout>
 
