@@ -24,6 +24,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
         val task = taskList.find { it.id == id } ?: return
         Log.d("provjera2", "postoji notifikacija")
+
         if(task.isComplete) return
 
         val title = task.title

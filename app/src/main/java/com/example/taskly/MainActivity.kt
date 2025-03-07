@@ -84,4 +84,6 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-//TODO -uređivanje, -obavijest, -sortiranje, promjena teme (samo treba par stvari zamijenit i dodat postavku da se moze mijenjat tema)
+//TODO -uređivanje, -obavijest, -sortiranje,
+// biranje alarma ili bez alarma,
+// promjena teme (samo treba par stvari zamijenit i dodat postavku da se moze mijenjat tema)

@@ -25,14 +25,14 @@ data class Task(
 
     companion object {
 
-        fun createTask(title: String, description: String, date: LocalDateTime, priority: String, isComplete: Boolean, dateChanged: String): Task {
+        fun createTask(title: String, description: String, date: LocalDateTime, priority: String/*, isComplete: Boolean, dateChanged: String*/): Task {
             return Task(
                 title = title,
                 description = description,
                 date = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 priority = priority,
-                isComplete = isComplete,
-                dateChanged = dateChanged
+                //isComplete = isComplete,
+                //dateChanged = dateChanged
             )
         }
     }

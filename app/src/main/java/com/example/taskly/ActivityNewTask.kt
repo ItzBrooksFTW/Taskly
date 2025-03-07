@@ -21,6 +21,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.taskly.data.Task
 import com.example.taskly.utils.TaskStorage
+import com.example.taskly.utils.formatDateTime
 import com.example.taskly.utils.switchScreens
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -43,7 +44,7 @@ class ActivityNewTask : AppCompatActivity() {
     private var taskList: MutableList<Task> = mutableListOf()
     private var taskToEditID: String? = null  //sluzi da se provjeri je li se ureduje zadatak ili samo stvara novi
     private var taskToEdit: Task? = null
-    private var taskToSchedule: Task? = null
+    private var taskToSchedule: String? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,8 +64,10 @@ class ActivityNewTask : AppCompatActivity() {
         taskStorage = TaskStorage(this)
         taskList = taskStorage.loadTasks().toMutableList()
 
+        taskToEditID = intent.getStringExtra("taskID")
+        taskToEdit = taskList.find { it.id == taskToEditID }
         Log.d("ActivityNewTask", "Loaded tasks: $taskList")
-
+        Log.d("tasktoedit", "$taskToEditID")
 
         val spinner: Spinner = findViewById(R.id.spinnerPriority)
 
@@ -93,8 +96,7 @@ class ActivityNewTask : AppCompatActivity() {
             spinner.adapter = adapter
         }
 
-        taskToEditID = intent.getStringExtra("taskID")
-        taskToEdit = taskList.find { it.id == taskToEditID }
+
         taskToEdit?.let { task ->
             findViewById<TextView>(R.id.activityTitle).text= "Uredi zadatak"
             findViewById<TextView>(R.id.titleInput).text = task.title
@@ -112,8 +114,8 @@ class ActivityNewTask : AppCompatActivity() {
                 val title = findViewById<TextView>(R.id.titleInput).text.toString().trim()
                 val description = findViewById<TextView>(R.id.descInput).text.toString().trim()
                 val priority = spinner.selectedItem.toString()
-                if (taskToEdit != null) {
-
+                if (taskToEditID != null) {
+                    val prevDate=taskList.find { it.id == taskToEditID }!!.date
                     taskToEdit!!.title = title
                     taskToEdit!!.description = description
                     taskToEdit!!.date = selectedDateTime!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
@@ -126,17 +128,25 @@ class ActivityNewTask : AppCompatActivity() {
                         taskList[position] = taskToEdit!!
                         Log.d("ActivityNewTaskEdit2", "Postoji")
                     }
-                    taskToSchedule=taskToEdit
+                    //takeif provjerava je li datum poslije sadasnjeg vremena jer se alarm postavlja cak i s proslim vremenom pa daje notifikaciju odmah
+                    taskToSchedule=taskToEditID.takeIf{ LocalDateTime.parse(taskToEdit!!.date).isAfter(LocalDateTime.now()) && prevDate!=taskToEdit!!.date}
                     Log.d("ActivityNewTaskEdit", "Loaded tasks: $taskList")
                 } else {
 
-                    val task = Task.createTask(title, description, selectedDateTime!!, priority, false, "")
+                    val task = Task.createTask(title, description, selectedDateTime!!, priority/*, false, ""*/)
                     taskList.add(task)
 
-                    taskToSchedule=task
+                    taskToSchedule=task.id.takeIf{ LocalDateTime.parse(task.date).isAfter(LocalDateTime.now())}
+                    Log.d("taskID", "${task.id}\n$taskToSchedule")
                 }
-                taskToSchedule?.let { scheduleNotification(it) }
+
+                Log.d("taskID3", "$taskToSchedule")
                 taskStorage.saveTasks(taskList)
+
+
+                taskToSchedule?.let { scheduleNotification(it)
+                    Log.d("taskID2", "$taskToSchedule")
+                }
                 switchScreens(this, ActivityAllTasks::class.java, true, null)
             } else {
                 Toast.makeText(this, "Unesite naslov i datum", Toast.LENGTH_SHORT).show()
@@ -244,9 +254,12 @@ class ActivityNewTask : AppCompatActivity() {
 
 
 
-    private fun scheduleNotification(task: Task) {
-
-
+    private fun scheduleNotification(taskID:String) {
+        Log.d("vrijeme0", "$taskID")
+        val loadedTasks= taskStorage.loadTasks().toMutableList()
+        Log.d("taskovi", "Loaded tasks: $loadedTasks")
+        val task = loadedTasks.find { it.id == taskID } ?: return
+        Log.d("vrijeme", task.getLocalDateTime().toString())
         val intent = Intent(this, NotificationReceiver::class.java).apply {
             putExtra("id", task.id)
         }
@@ -261,9 +274,12 @@ class ActivityNewTask : AppCompatActivity() {
         val triggerAtMillis =
             task.getLocalDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
+        Log.d("vrijeme", LocalDateTime.ofInstant(Instant.ofEpochMilli(triggerAtMillis), ZoneId.systemDefault()).toString())
 
         try {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            Log.d("vrijeme2", LocalDateTime.ofInstant(Instant.ofEpochMilli(triggerAtMillis), ZoneId.systemDefault()).toString())
+
         } catch (e: SecurityException) {
             Log.e("ActivityNewTask", "Cannot schedule exact alarms: ${e.message}")
         }
