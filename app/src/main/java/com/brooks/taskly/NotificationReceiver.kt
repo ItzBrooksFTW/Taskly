@@ -1,5 +1,5 @@
 // NotificationReceiver.kt
-package com.example.taskly
+package com.brooks.taskly
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -9,9 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
-import com.example.taskly.utils.formatDateTime
+import com.brooks.taskly.utils.formatDateTime
 import java.time.LocalDateTime
-import com.example.taskly.utils.TaskStorage
+import com.brooks.taskly.utils.TaskStorage
 import android.util.Log
 
 class NotificationReceiver : BroadcastReceiver() {
@@ -33,7 +33,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "task_channel"
 
-        val channel = NotificationChannel(channelId, "Task Notifications", NotificationManager.IMPORTANCE_HIGH)
+        val channel = NotificationChannel(channelId, "Obavijesti za zadatke", NotificationManager.IMPORTANCE_HIGH)
         notificationManager.createNotificationChannel(channel)
 
         //da se otvori aplikacija kad se klikne na notifikaciju

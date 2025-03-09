@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.taskly"
+    namespace = "com.brooks.taskly"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.taskly"
+        applicationId = "com.brooks.taskly"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

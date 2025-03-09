@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+<item android:drawable="@drawable/rounded_border"/>
+
+    <item
+        android:drawable="@drawable/dropdown_icon_colored"
+        android:gravity="end|center_vertical"
+        android:width="26dp"
+        android:height="26dp"
+        android:scaleType="fitCenter"
+        android:right="8dp"
+        />
+    <item
+        android:drawable="@drawable/dropdown_icon_colored"
+        android:gravity="start|center_vertical"
+        android:width="26dp"
+        android:height="26dp"
+        android:scaleType="fitCenter"
+        android:left="8dp"
+        />
+
+</layer-list>

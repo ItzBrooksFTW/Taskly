@@ -1,9 +1,38 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Base application theme. -->
     <style name="Base.Theme.Taskly" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <item name="colorPrimary">@color/colorPrimaryLight</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariantLight</item>
+        <item name="colorOnPrimary">@color/colorOnPrimaryLight</item>
+        <item name="colorSecondary">@color/colorSecondaryLight</item>
+        <item name="colorSecondaryVariant">@color/colorSecondaryVariantLight</item>
+        <item name="colorOnSecondary">@color/colorOnSecondaryLight</item>
+        <item name="android:colorBackground">@color/colorBackgroundLight</item>
+        <item name="colorOnBackground">@color/colorOnBackgroundLight</item>
+        <item name="colorSurface">@color/colorSurfaceLight</item>
+        <item name="colorOnSurface">@color/colorOnSurfaceLight</item>
+        <item name="colorError">@color/colorErrorLight</item>
+        <item name="colorOnError">@color/colorOnErrorLight</item>
+        <item name="android:textColorPrimary">@color/textColorPrimaryLight</item>
+        <item name="android:textColorSecondary">@color/textColorSecondaryLight</item>
+        <item name="android:windowBackground">@color/windowBackgroundLight</item>
+        <item name="android:statusBarColor">@color/statusBarColorLight</item>
+        <item name="android:navigationBarColor">@color/navigationBarColorLight</item>
+        <item name="customInputBackgroundColor">@color/customInputsColorLight</item>
+        <item name="dayNightColor">#000000</item>
+        <item name="textAppearanceBody1">@style/CustomTextAppearance</item>
+    </style>
+    <style name="CustomInputStyle">
+        <item name="android:textColor">@color/textColorPrimaryLight</item>
+        <item name="android:textColorHint">@color/textColorSecondaryLight</item>
+        <item name="android:background">@drawable/rounded_border</item>
+    </style>
+    <style name="CustomTextAppearance" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="Theme.Taskly" parent="Base.Theme.Taskly" />
+
 </resources>

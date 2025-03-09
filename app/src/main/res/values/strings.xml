@@ -1,9 +1,44 @@
 <resources>
-    <string name="app_name">Taskly</string>
+    <string name="app_name" translatable="false">Taskly</string>
     <string name="new_task">Novi Zadatak</string>
     <string name="all_tasks" translatable="true">Svi Zadatci</string>
     <string name="create_task" translatable="true">Stvori Zadatak</string>
     <string name="back">Nazad</string>
+    <string name="empty_list">Lista zadataka je prazna!</string>
+    <string name="priority">Prioritet</string>
+    <string name="sort">Sortiraj po</string>
+    <string name="theme">Tema</string>
+    <string name="date">Datum</string>
+    <string name="title">Naslov</string>
+    <string name="description">Opis</string>
+    <string name="spinner_hint">Odaberi</string>
+    <string name="spinner_hint_theme">Odaberi Temu</string>
+    <string name="new_task_title">Unos zadatka</string>
+    <string name="title_input_hint">Unesi naslov</string>
+    <string name="desc_input_hint">Unesi opis</string>
+    <string name="char_count_warning_title">Najveci broj znakova je 50!</string>
+    <string name="char_count_warning_desc">Najveci broj znakova je 450!</string>
+    <string name="date_time">Datum i Vrijeme</string>
+    <string name="dueDate">Rok do: %1$s</string>
+    <string name="priority2">%1$s prioritet</string>
+    <string name="date_changed">Izmijenjeno %1$s</string>
+    <string name="no_change">Nema izmjene</string>
+    <string name="delete_task">Brisanje Zadatka</string>
+    <string name="delete_task_message">Jeste li sigurni da želite izbrisati ovaj zadatak?</string>
+    <string name="delete_task_confirm">Da</string>
+    <string name="delete_task_cancel">Ne</string>
+    <string name="edit_task_title">Uredi Zadatak</string>
+    <string name="update_task">Ažuriraj Zadatak</string>
+    <string name="date_picker_title">Odaberi Datum</string>
+    <string name="time_picker_title">Odaberi Vrijeme</string>
+    <string name="time_toast">Odaberite buduće vrijeme</string>
+    <string name="delete_success">Zadatak je uspješno obrisan!</string>
+    <string name="delete_button">Izbriši</string>
+    <string name="edit_button">Izmijeni</string>
+    <string name="no_description">Nema Opisa!</string>
+    <string name="completed_tasks">Obavljeni zadatci %1$d/%2$d</string>
+
+
     <string-array name="dropdown_values_priority">
         <item>Visoki</item>
         <item>Srednji</item>
@@ -13,5 +48,10 @@
         <item>Sortiraj po (Zadano)</item>
         <item>Po datumu</item>
         <item>Po prioritetu</item>
+    </string-array>
+    <string-array name="dropdown_values_theme">
+        <item>Automatski</item>
+        <item>Svijetla Tema</item>
+        <item>Tamna Tema</item>
     </string-array>
 </resources>

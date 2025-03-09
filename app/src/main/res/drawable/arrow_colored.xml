@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap
+            android:src="@drawable/arrow"
+            android:tint="?attr/dayNightColor"
+            android:tintMode="src_in" />
+    </item>
+</layer-list>

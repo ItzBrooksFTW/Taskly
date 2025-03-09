@@ -1,4 +1,4 @@
-package com.example.taskly
+package com.brooks.taskly
 
 
 
@@ -19,10 +19,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.taskly.data.Task
-import com.example.taskly.utils.TaskStorage
-import com.example.taskly.utils.formatDateTime
-import com.example.taskly.utils.switchScreens
+import com.brooks.taskly.data.Task
+import com.brooks.taskly.utils.TaskStorage
+import com.brooks.taskly.utils.switchScreens
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -34,10 +33,15 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import android.text.TextWatcher
+import android.text.Editable
+import android.view.View
+import com.brooks.taskly.utils.checkForPerms
+import com.brooks.taskly.utils.checkTheme
+import com.brooks.taskly.utils.fadeInOut
 
 class ActivityNewTask : AppCompatActivity() {
 
-    private lateinit var dateInput : TextView
     private var selectedDateTime: LocalDateTime? = null
     private var currentDateTime: LocalDateTime? = null
     private lateinit var taskStorage: TaskStorage
@@ -45,6 +49,17 @@ class ActivityNewTask : AppCompatActivity() {
     private var taskToEditID: String? = null  //sluzi da se provjeri je li se ureduje zadatak ili samo stvara novi
     private var taskToEdit: Task? = null
     private var taskToSchedule: String? = null
+
+    private lateinit var titleInput: TextView
+    private lateinit var charCountWarningTitle: TextView
+    private lateinit var charCountWarningDesc: TextView
+    private lateinit var descInput: TextView
+    private lateinit var dateInput: TextView
+    private lateinit var spinner: Spinner
+    private lateinit var buttonSubmit: Button
+
+    private var isCharCountWarningTitleVisible = false
+    private var isCharCountWarningDescVisible = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +72,7 @@ class ActivityNewTask : AppCompatActivity() {
             insets
         }
 
-
+        checkTheme(this)
 
 
 
@@ -69,11 +84,17 @@ class ActivityNewTask : AppCompatActivity() {
         Log.d("ActivityNewTask", "Loaded tasks: $taskList")
         Log.d("tasktoedit", "$taskToEditID")
 
-        val spinner: Spinner = findViewById(R.id.spinnerPriority)
-
-        val buttonSubmit : Button=findViewById(R.id.buttonSubmit)
-
+        titleInput=findViewById(R.id.titleInput)
+        charCountWarningTitle=findViewById(R.id.charCountWarningTitle)
+        charCountWarningDesc=findViewById(R.id.charCountWarningDesc)
+        descInput=findViewById(R.id.descInput)
         dateInput = findViewById(R.id.dateInput)
+        spinner= findViewById(R.id.spinnerPriority)
+
+        buttonSubmit=findViewById(R.id.buttonSubmit)
+
+
+
 
         dateInput.setOnClickListener(){
 
@@ -81,6 +102,48 @@ class ActivityNewTask : AppCompatActivity() {
 
         }
 
+
+        titleInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s != null && s.length > 25 && !isCharCountWarningTitleVisible) {
+                    //charCountWarningTitle.visibility = View.VISIBLE
+                    fadeInOut(charCountWarningTitle, true)
+                    isCharCountWarningTitleVisible = true
+                } else if(s!=null && s.length<=25 && isCharCountWarningTitleVisible){
+                    //charCountWarningTitle.visibility = View.GONE
+                    fadeInOut(charCountWarningTitle, false)
+
+                    isCharCountWarningTitleVisible = false
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+        descInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s != null && s.length > 400 && !isCharCountWarningDescVisible) {
+                    //charCountWarningTitle.visibility = View.VISIBLE
+                    fadeInOut(charCountWarningDesc, true).also{
+                        charCountWarningDesc.visibility=View.VISIBLE
+                    }
+                    isCharCountWarningDescVisible = true
+                } else if(s!=null && s.length<=400 && isCharCountWarningDescVisible){
+
+                    //charCountWarningTitle.visibility = View.GONE
+                    fadeInOut(charCountWarningDesc, false).also{
+                        charCountWarningDesc.visibility=View.GONE
+                    }
+                    isCharCountWarningDescVisible = false
+
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
 
         currentDateTime=LocalDateTime.now().plus(5, java.time.temporal.ChronoUnit.MINUTES)
@@ -90,29 +153,29 @@ class ActivityNewTask : AppCompatActivity() {
        ArrayAdapter.createFromResource(
             this,
             R.array.dropdown_values_priority,
-            android.R.layout.simple_spinner_item
+            R.layout.spinner_item
         ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            adapter.setDropDownViewResource(R.layout.spinner_item)
             spinner.adapter = adapter
         }
 
 
         taskToEdit?.let { task ->
-            findViewById<TextView>(R.id.activityTitle).text= "Uredi zadatak"
-            findViewById<TextView>(R.id.titleInput).text = task.title
-            findViewById<TextView>(R.id.descInput).text = task.description
+            findViewById<TextView>(R.id.activityTitle).text= getString(R.string.edit_task_title)
+            titleInput.text = task.title
+            descInput.text = task.description
             selectedDateTime = LocalDateTime.parse(task.date)
             updateSelectedDateTextView(selectedDateTime!!)
             val priorityPosition = resources.getStringArray(R.array.dropdown_values_priority).indexOf(task.priority)
             spinner.setSelection(priorityPosition)
-            buttonSubmit.text = "Ažuriraj zadatak"
+            buttonSubmit.text = getString(R.string.update_task)
         }
 
         buttonSubmit.setOnClickListener(){
-
+            checkForPerms(this, activityResultRegistry)
             if (findViewById<TextView>(R.id.titleInput).text.toString().isNotBlank() && selectedDateTime != null) {
-                val title = findViewById<TextView>(R.id.titleInput).text.toString().trim()
-                val description = findViewById<TextView>(R.id.descInput).text.toString().trim()
+                val title = titleInput.text.toString().trim().capitalize(Locale.getDefault())
+                val description = descInput.text.toString().trim().capitalize(Locale.getDefault())
                 val priority = spinner.selectedItem.toString()
                 if (taskToEditID != null) {
                     val prevDate=taskList.find { it.id == taskToEditID }!!.date
@@ -164,18 +227,26 @@ class ActivityNewTask : AppCompatActivity() {
 
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if(taskToEdit ==null) {
+            switchScreens(this, MainActivity::class.java)
+        }
+        else{
+            switchScreens(this, ActivityAllTasks::class.java)
+        }
+    }
 
 
     private fun showMaterialDatePicker() {
         val dateSelection: Long
 
         val today = MaterialDatePicker.todayInUtcMilliseconds()
-        if(taskToEdit==null){
-            dateSelection=today
+        dateSelection = if(taskToEdit==null){
+            today
 
-        }
-        else{
-            dateSelection=LocalDateTime.parse(taskToEdit!!.date).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        } else{
+            LocalDateTime.parse(taskToEdit!!.date).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         }
         val constraintsBuilder = CalendarConstraints.Builder()
             .setStart(today)
@@ -183,7 +254,7 @@ class ActivityNewTask : AppCompatActivity() {
 
 
             val datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Izaberi datum")
+                .setTitleText(getString(R.string.date_picker_title))
                 .setSelection(dateSelection)
                 .setCalendarConstraints(constraintsBuilder.build())
                 .build()
@@ -202,12 +273,10 @@ class ActivityNewTask : AppCompatActivity() {
 
 
     private fun showMaterialTimePicker(selectedDate: LocalDate) {
-        val timeSelection: LocalDateTime
-        if(taskToEdit==null){ //ako se stvara novi zadatak
-            timeSelection = LocalDateTime.now().plusMinutes(5)
-        }
-        else{ //ako se ureduje zadatak
-            timeSelection = LocalDateTime.parse(taskToEdit!!.date)
+        val timeSelection: LocalDateTime = if(taskToEdit==null){ //ako se stvara novi zadatak
+            LocalDateTime.now().plusMinutes(5)
+        } else{ //ako se ureduje zadatak
+            LocalDateTime.parse(taskToEdit!!.date)
         }
 
 
@@ -219,7 +288,7 @@ class ActivityNewTask : AppCompatActivity() {
             .setHour(hour)
             .setMinute(minute)
             .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-            .setTitleText("Izaberi vrijeme")
+            .setTitleText(getString(R.string.time_picker_title))
             .build()
 
         timePicker.addOnPositiveButtonClickListener {
@@ -237,7 +306,7 @@ class ActivityNewTask : AppCompatActivity() {
 
             } else {
                 Log.d("ActivityNewTask", "$selectedDate $selectedTime")
-                Toast.makeText(this, "Odaberite buduće vrijeme", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.time_toast), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -255,7 +324,7 @@ class ActivityNewTask : AppCompatActivity() {
 
 
     private fun scheduleNotification(taskID:String) {
-        Log.d("vrijeme0", "$taskID")
+        Log.d("vrijeme0", taskID)
         val loadedTasks= taskStorage.loadTasks().toMutableList()
         Log.d("taskovi", "Loaded tasks: $loadedTasks")
         val task = loadedTasks.find { it.id == taskID } ?: return

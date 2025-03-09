@@ -1,4 +1,4 @@
-package com.example.taskly
+package com.brooks.taskly
 
 import org.junit.Test
 

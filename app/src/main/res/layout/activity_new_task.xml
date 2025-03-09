@@ -7,13 +7,11 @@
     android:layout_height="match_parent"
     tools:context=".ActivityNewTask">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="300dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mainInfo"
+        android:layout_width="289dp"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
+        android:layout_marginTop="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,108 +21,181 @@
             android:id="@+id/activityTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Unos podsjetnika"
+
+            android:text="@string/new_task_title"
             android:textAlignment="center"
+            android:textAppearance="?attr/textAppearanceBody1"
             android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+
+            />
 
         <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Naslov"
+            android:layout_marginTop="20dp"
+            android:text="@string/title"
             android:textAlignment="center"
+            android:textAppearance="?attr/textAppearanceBody1"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityTitle" />
 
         <EditText
             android:id="@+id/titleInput"
+            style="@style/CustomInputStyle"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
             android:autofillHints="no"
-            android:background="@drawable/rounded_border"
+            android:capitalize="sentences"
             android:ems="10"
-            android:hint="Unesi naslov"
-            android:inputType="text"
-            android:padding="5dp" />
+            android:hint="@string/title_input_hint"
+            android:inputType="text|textCapSentences"
+            android:maxLength="50"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+        <TextView
+            android:id="@+id/charCountWarningTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:text="@string/char_count_warning_title"
+            android:textColor="@color/colorErrorDark"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/titleInput" />
 
         <TextView
             android:id="@+id/textView5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Opis"
+            android:layout_marginTop="20dp"
+            android:text="@string/description"
             android:textAlignment="center"
+            android:textAppearance="?attr/textAppearanceBody1"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/titleInput" />
 
         <EditText
             android:id="@+id/descInput"
+            style="@style/CustomInputStyle"
             android:layout_width="match_parent"
             android:layout_height="150dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
             android:autofillHints="no"
-            android:background="@drawable/rounded_border"
+            android:capitalize="sentences"
             android:ems="10"
             android:gravity="start|top"
-            android:hint="Unesi opis"
-            android:inputType="textMultiLine"
-            android:padding="5dp"
-            android:singleLine="false" />
+            android:hint="@string/desc_input_hint"
+            android:inputType="textMultiLine|textAutoCorrect|textCapSentences"
+            android:maxLength="450"
+            android:padding="10dp"
+            android:singleLine="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
+        <TextView
+            android:id="@+id/charCountWarningDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginEnd="5dp"
+            android:text="@string/char_count_warning_desc"
+            android:textColor="@color/colorErrorDark"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/descInput" />
 
         <TextView
             android:id="@+id/textView7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Datum i vrijeme"
+            android:layout_marginTop="20dp"
+            android:text="@string/date_time"
             android:textAlignment="center"
+            android:textAppearance="?attr/textAppearanceBody1"
             android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/descInput" />
 
         <TextView
             android:id="@+id/dateInput"
+            style="@style/CustomInputStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/rounded_border"
+            android:layout_marginTop="20dp"
             android:clickable="true"
             android:padding="15dp"
-            android:text="10/2/2025"
+            android:text=""
+            android:contentDescription="@string/date_time"
             android:textAlignment="center"
+            android:textIsSelectable="false"
             android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView7" />
 
         <TextView
             android:id="@+id/textView9"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Prioritet"
+            android:layout_marginTop="20dp"
+            android:text="@string/priority"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dateInput" />
 
         <Spinner
             android:id="@+id/spinnerPriority"
             android:layout_width="175dp"
             android:layout_height="50dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/rounded_border"
-            android:textAlignment="center" />
-    </LinearLayout>
+            android:layout_marginTop="20dp"
+            android:background="@drawable/spinner_background"
+            android:padding="5dp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout2"
+        android:id="@+id/navigationButtons"
         android:layout_width="350dp"
         android:layout_height="50dp"
+        android:layout_marginBottom="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+        app:layout_constraintStart_toStartOf="parent">
 
         <Button
             android:id="@+id/buttonSubmit"

@@ -1,8 +1,8 @@
-package com.example.taskly.utils
+package com.brooks.taskly.utils
 
 import android.content.Context
 
-import com.example.taskly.data.Task
+import com.brooks.taskly.data.Task
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

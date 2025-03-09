@@ -1,4 +1,4 @@
-package com.example.taskly
+package com.brooks.taskly
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -13,22 +13,24 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.taskly.data.Task
-import com.example.taskly.utils.TaskAdapter
-import com.example.taskly.utils.TaskStorage
-import com.example.taskly.utils.switchScreens
+import com.brooks.taskly.data.Task
+import com.brooks.taskly.utils.TaskAdapter
+import com.brooks.taskly.utils.TaskStorage
+import com.brooks.taskly.utils.switchScreens
 import java.time.LocalDateTime
 import androidx.core.graphics.createBitmap
+import com.brooks.taskly.utils.checkTheme
 
 
 class ActivityAllTasks : AppCompatActivity() {
     private lateinit var taskStorage: TaskStorage
-    private lateinit var taskList: MutableList<Task>
+    private var taskList: MutableList<Task> = mutableListOf()
     private lateinit var taskAdapter: TaskAdapter
     private lateinit var sortedTaskList: MutableList<Task>
 
@@ -42,13 +44,31 @@ class ActivityAllTasks : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        checkTheme(this)
         taskStorage = TaskStorage(this)
         taskList = taskStorage.loadTasks().toMutableList()
+
+
+
+        val emptyListWarning : TextView = findViewById(R.id.emptyListWarning)
+
+        if(taskList.isEmpty()){
+            emptyListWarning.visibility=View.VISIBLE
+        }
+        else{
+            emptyListWarning.visibility=View.GONE
+        }
+
 
         var sortOrder= true
         val buttonBack: Button = findViewById(R.id.buttonBack)
         val spinner: Spinner = findViewById(R.id.spinnerSorting)
         val buttonSort: ImageButton = findViewById(R.id.buttonSort)
+
+        taskAdapter = TaskAdapter(this, taskList)
+        val listView: ListView = findViewById(R.id.listViewTasks)
+        listView.adapter = taskAdapter
 
         buttonBack.setOnClickListener {
 
@@ -58,9 +78,9 @@ class ActivityAllTasks : AppCompatActivity() {
         ArrayAdapter.createFromResource(
             this,
             R.array.dropdown_values_sort,
-            android.R.layout.simple_spinner_item
+            R.layout.spinner_item
         ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            adapter.setDropDownViewResource(R.layout.spinner_item)
             spinner.adapter = adapter
         }
         spinner.setSelection(0, false)
@@ -80,21 +100,24 @@ class ActivityAllTasks : AppCompatActivity() {
             sortTasks(sortOrder)
             Log.d("sortOrder", sortOrder.toString())
 
-            val flippedBitmap=flipDrawable(this, R.drawable.arrow, sortOrder)
+            val flippedBitmap=flipDrawable(this, R.drawable.arrow_colored, sortOrder)
             buttonSort.setImageBitmap(flippedBitmap)
         }
 
 
 
 
-        taskAdapter = TaskAdapter(this, taskList)
-        val listView: ListView = findViewById(R.id.listViewTasks)
-        listView.adapter = taskAdapter
+
 
 
 
 
     }
+    override fun onBackPressed() {
+        super.onBackPressed()
+        switchScreens(this, MainActivity::class.java)
+    }
+
     private fun sortTasks(sortOrder:Boolean) {
 
 
@@ -109,7 +132,7 @@ class ActivityAllTasks : AppCompatActivity() {
             "Visoki" to 2
         )
 
-
+       val taskListCopy = taskList.map { it.copy() }.toMutableList()
 
         sortedTaskList = when (sortChoice) {
 
@@ -118,21 +141,25 @@ class ActivityAllTasks : AppCompatActivity() {
             "Po datumu" -> {
 
                 if (sortOrder) {
-                    taskList.sortedBy { LocalDateTime.parse(it.date) }
+                    taskListCopy.sortedBy { LocalDateTime.parse(it.date) }.also{
+                        Log.d("taskovidatum", "Loaded tasks: $taskList")
+                    }
                 } else {
-                    taskList.sortedByDescending { LocalDateTime.parse(it.date) }
+                    taskListCopy.sortedByDescending { LocalDateTime.parse(it.date) }.also{
+                        Log.d("taskovidatum2", "Loaded tasks: $taskList")
+                    }
                 }
             }
             "Po prioritetu" -> {
                 if (sortOrder) {
-                    taskList.sortedBy { priorityMap[it.priority]?:0 }
+                    taskListCopy.sortedBy { priorityMap[it.priority]?:0 }
                 } else {
-                    taskList.sortedByDescending { priorityMap[it.priority]?:0 }
+                    taskListCopy.sortedByDescending { priorityMap[it.priority]?:0 }
                 }
             }
 
             else -> {
-                Log.d("taskovi", "Loaded tasks: $taskList")
+                Log.d("taskoviDefault", "Loaded tasks: $taskList")
                 taskStorage.loadTasks()
 
             }

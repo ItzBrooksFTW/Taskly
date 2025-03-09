@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/CustomInputStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
     android:orientation="vertical"
     android:padding="20dp">
 
@@ -27,6 +29,13 @@
         android:textSize="18sp" />
 
     <TextView
+        android:id="@+id/textViewTaskOverDuePopup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/colorError"
+        />
+
+    <TextView
         android:id="@+id/textViewTaskPriority"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,7 +44,7 @@
 
     <TextView
         android:id="@+id/textViewTaskDateChanged"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
 </LinearLayout>
