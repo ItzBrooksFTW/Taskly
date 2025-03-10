@@ -43,7 +43,7 @@ class TaskAdapter(private val context: Context, private val taskList: MutableLis
 
         textViewTaskTitle.text = task.title
         textViewTaskDate.text = date
-        textViewTaskPriority.text= task.priority
+        textViewTaskPriority.text= context.getString(R.string.priority2, task.priority)
 
         overDue.text= getDifferenceFromNow(task.date)
 
@@ -151,7 +151,7 @@ class TaskAdapter(private val context: Context, private val taskList: MutableLis
             showTaskList.remove(task)
             taskStorage.saveTasks(taskList)
             notifyDataSetChanged()
-            checkList(context as ActivityAllTasks)
+            checkList(context as ActivityAllTasks)  //provjerava je li lista prazna
             dialog.dismiss()
             Toast.makeText(context, context.getString(R.string.delete_success), Toast.LENGTH_SHORT, ).show()
 

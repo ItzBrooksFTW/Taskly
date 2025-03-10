@@ -18,14 +18,14 @@ class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 
 
-        //provjerava ako je zadatak izvrsen, ako je onda ne salje notifikaciju
+
         val id = intent.getStringExtra("id")
         val taskList = TaskStorage(context).loadTasks()
 
-        val task = taskList.find { it.id == id } ?: return
+        val task = taskList.find { it.id == id } ?: return //ako zadatak nije pronadjen ne treba se prikazati notifikacija
         Log.d("provjera2", "postoji notifikacija")
 
-        if(task.isComplete) return
+        if(task.isComplete) return  //ako je zadatak vec zavrsen ne treba se prikazati notifikacija
 
         val title = task.title
         val date = formatDateTime(LocalDateTime.parse(task.date))
@@ -34,13 +34,16 @@ class NotificationReceiver : BroadcastReceiver() {
         val channelId = "task_channel"
 
         val channel = NotificationChannel(channelId, "Obavijesti za zadatke", NotificationManager.IMPORTANCE_HIGH)
-        notificationManager.createNotificationChannel(channel)
+        notificationManager.createNotificationChannel(channel) //kreira se kanal za notifikacije
 
-        //da se otvori aplikacija kad se klikne na notifikaciju
+        //da se otvori aplikacija na zaslonu allTasks kad se klikne na notifikaciju
         val openAppIntent = Intent(context, ActivityAllTasks::class.java)
         val pendingIntent = PendingIntent.getActivity(context, 0, openAppIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
+        //postavljanje ikone za notifikaciju
         val largeIcon = BitmapFactory.decodeResource(context.resources, R.drawable.exclamation_icon)
+
+        //kreiranje notifikacije
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setLargeIcon(largeIcon)
@@ -51,6 +54,6 @@ class NotificationReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(0, notification)
+        notificationManager.notify(0, notification) //prikazuje notifikaciju
     }
 }

@@ -18,12 +18,15 @@
         <item name="colorOnError">@color/colorOnErrorLight</item>
         <item name="android:textColorPrimary">@color/textColorPrimaryLight</item>
         <item name="android:textColorSecondary">@color/textColorSecondaryLight</item>
+        <item name="android:textColorTertiary">@color/textColorTertiaryLight</item>"
         <item name="android:windowBackground">@color/windowBackgroundLight</item>
         <item name="android:statusBarColor">@color/statusBarColorLight</item>
         <item name="android:navigationBarColor">@color/navigationBarColorLight</item>
         <item name="customInputBackgroundColor">@color/customInputsColorLight</item>
         <item name="dayNightColor">#000000</item>
         <item name="textAppearanceBody1">@style/CustomTextAppearance</item>
+        <item name="textAppearanceTitleLarge">@style/CustomTextTitleAppearance</item>
+        <item name="borderColor">@color/borderColorLight</item>
     </style>
     <style name="CustomInputStyle">
         <item name="android:textColor">@color/textColorPrimaryLight</item>
@@ -31,8 +34,10 @@
         <item name="android:background">@drawable/rounded_border</item>
     </style>
     <style name="CustomTextAppearance" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+    </style>
+    <style name="CustomTextTitleAppearance" parent="TextAppearance.MaterialComponents.Headline6">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
-
 
 </resources>

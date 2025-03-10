@@ -72,15 +72,15 @@ class ActivityNewTask : AppCompatActivity() {
             insets
         }
 
-        checkTheme(this)
+        checkTheme(this)  //provjerava se koja je tema postavljena
 
 
 
         taskStorage = TaskStorage(this)
-        taskList = taskStorage.loadTasks().toMutableList()
+        taskList = taskStorage.loadTasks().toMutableList() //ucitava se lista zadataka
 
-        taskToEditID = intent.getStringExtra("taskID")
-        taskToEdit = taskList.find { it.id == taskToEditID }
+        taskToEditID = intent.getStringExtra("taskID") //ako je poslan intent s ID-om zadataka onda se ureduje taj zadatak
+        taskToEdit = taskList.find { it.id == taskToEditID } //trazi se zadatak s tim ID-om
         Log.d("ActivityNewTask", "Loaded tasks: $taskList")
         Log.d("tasktoedit", "$taskToEditID")
 
@@ -96,13 +96,13 @@ class ActivityNewTask : AppCompatActivity() {
 
 
 
-        dateInput.setOnClickListener(){
+        dateInput.setOnClickListener(){ //klikom na polje za datum i vrijeme se otvara dialog za odabir
 
             showMaterialDatePicker()
 
         }
 
-
+        //provjerava se je li uneseno vise od 25 znakova i je li upozorenje vidljivo
         titleInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -121,6 +121,7 @@ class ActivityNewTask : AppCompatActivity() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
+        //provjerava se je li uneseno vise od 400 znakova i je li upozorenje vidljivo
         descInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -146,10 +147,12 @@ class ActivityNewTask : AppCompatActivity() {
         })
 
 
-        currentDateTime=LocalDateTime.now().plus(5, java.time.temporal.ChronoUnit.MINUTES)
-        updateSelectedDateTextView(currentDateTime!!)
-        selectedDateTime=currentDateTime
+        currentDateTime=LocalDateTime.now().plus(5, java.time.temporal.ChronoUnit.MINUTES)  //postavlja se trenutno vrijeme +5 minuta
+        updateSelectedDateTextView(currentDateTime!!) //postavlja se tekst na polje za datum i vrijeme
+        selectedDateTime=currentDateTime //postavlja se odabrano vrijeme na trenutno vrijeme
 
+
+        //postavlja se spinner za odabir prioriteta
        ArrayAdapter.createFromResource(
             this,
             R.array.dropdown_values_priority,
@@ -159,7 +162,7 @@ class ActivityNewTask : AppCompatActivity() {
             spinner.adapter = adapter
         }
 
-
+        //ako se ureduje zadatak onda se postavljaju vrijednosti polja na vrijednosti zadatka
         taskToEdit?.let { task ->
             findViewById<TextView>(R.id.activityTitle).text= getString(R.string.edit_task_title)
             titleInput.text = task.title
@@ -171,50 +174,15 @@ class ActivityNewTask : AppCompatActivity() {
             buttonSubmit.text = getString(R.string.update_task)
         }
 
+        //gumb za spremanje zadatka
         buttonSubmit.setOnClickListener(){
-            checkForPerms(this, activityResultRegistry)
-            if (findViewById<TextView>(R.id.titleInput).text.toString().isNotBlank() && selectedDateTime != null) {
-                val title = titleInput.text.toString().trim().capitalize(Locale.getDefault())
-                val description = descInput.text.toString().trim().capitalize(Locale.getDefault())
-                val priority = spinner.selectedItem.toString()
-                if (taskToEditID != null) {
-                    val prevDate=taskList.find { it.id == taskToEditID }!!.date
-                    taskToEdit!!.title = title
-                    taskToEdit!!.description = description
-                    taskToEdit!!.date = selectedDateTime!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                    taskToEdit!!.priority = priority
-                    taskToEdit!!.dateChanged = LocalDateTime.now().toString()
+            checkForPerms(this, activityResultRegistry) //provjerava se je li dozvola za alarm i notifikacije odobrena
+                makeTask(titleInput.text.toString(), taskList.size<30)
+                //vrijeme je uvijek odabrano pa nema potrebe za provjerom
 
-                    Log.d("provjera", "${taskToEdit!!.id}\n$taskToEditID")
-                    val position = taskList.indexOfFirst { it.id == taskToEditID }
-                    if(position != -1) {
-                        taskList[position] = taskToEdit!!
-                        Log.d("ActivityNewTaskEdit2", "Postoji")
-                    }
-                    //takeif provjerava je li datum poslije sadasnjeg vremena jer se alarm postavlja cak i s proslim vremenom pa daje notifikaciju odmah
-                    taskToSchedule=taskToEditID.takeIf{ LocalDateTime.parse(taskToEdit!!.date).isAfter(LocalDateTime.now()) && prevDate!=taskToEdit!!.date}
-                    Log.d("ActivityNewTaskEdit", "Loaded tasks: $taskList")
-                } else {
-
-                    val task = Task.createTask(title, description, selectedDateTime!!, priority/*, false, ""*/)
-                    taskList.add(task)
-
-                    taskToSchedule=task.id.takeIf{ LocalDateTime.parse(task.date).isAfter(LocalDateTime.now())}
-                    Log.d("taskID", "${task.id}\n$taskToSchedule")
-                }
-
-                Log.d("taskID3", "$taskToSchedule")
-                taskStorage.saveTasks(taskList)
-
-
-                taskToSchedule?.let { scheduleNotification(it)
-                    Log.d("taskID2", "$taskToSchedule")
-                }
-                switchScreens(this, ActivityAllTasks::class.java, true, null)
-            } else {
-                Toast.makeText(this, "Unesite naslov i datum", Toast.LENGTH_SHORT).show()
-            }
         }
+
+
         //gumb nazad
         val buttonBack: Button = findViewById(R.id.buttonBack)
         buttonBack.setOnClickListener {
@@ -226,7 +194,7 @@ class ActivityNewTask : AppCompatActivity() {
         }
 
     }
-
+    //ako se pritisne back button onda se vraca na prethodni zaslon
     override fun onBackPressed() {
         super.onBackPressed()
         if(taskToEdit ==null) {
@@ -237,17 +205,19 @@ class ActivityNewTask : AppCompatActivity() {
         }
     }
 
-
+    //funkcija za prikazivanje dialoga za odabir datuma
     private fun showMaterialDatePicker() {
         val dateSelection: Long
 
         val today = MaterialDatePicker.todayInUtcMilliseconds()
-        dateSelection = if(taskToEdit==null){
+        dateSelection = if(taskToEdit==null){  //ako se stvara novi zadatak onda se postavlja na danasnji datum
             today
 
-        } else{
+        } else{  //ako se ureduje zadatak onda se postavlja odabrani datum
             LocalDateTime.parse(taskToEdit!!.date).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         }
+
+
         val constraintsBuilder = CalendarConstraints.Builder()
             .setStart(today)
 
@@ -271,17 +241,20 @@ class ActivityNewTask : AppCompatActivity() {
     }
 
 
-
+    //funkcija za prikazivanje dialoga za odabir vremena
     private fun showMaterialTimePicker(selectedDate: LocalDate) {
-        val timeSelection: LocalDateTime = if(taskToEdit==null){ //ako se stvara novi zadatak
+
+        //ako se stvara novi zadatak onda se postavlja na trenutno vrijeme +5 minuta
+        val timeSelection: LocalDateTime = if(taskToEdit==null){
             LocalDateTime.now().plusMinutes(5)
-        } else{ //ako se ureduje zadatak
+        } else{ //ako se ureduje zadatak onda se postavlja na odabrano vrijeme
             LocalDateTime.parse(taskToEdit!!.date)
         }
 
 
         val hour = timeSelection.hour
         val minute = timeSelection.minute
+
 
         val timePicker = MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_24H)
@@ -299,21 +272,21 @@ class ActivityNewTask : AppCompatActivity() {
 
 
 
-           if (LocalDateTime.of(selectedDate, selectedTime).isAfter(LocalDateTime.now())) {
+           if (LocalDateTime.of(selectedDate, selectedTime).isAfter(LocalDateTime.now())) { //provjerava je li odabrano vrijeme u buducnosti
                 selectedDateTime = LocalDateTime.of(selectedDate, selectedTime)
                Log.d("ActivityNewTask", "$selectedDate $selectedTime")
                 updateSelectedDateTextView(selectedDateTime!!)
 
-            } else {
+            } else { //ako nije onda se prikazuje toast
                 Log.d("ActivityNewTask", "$selectedDate $selectedTime")
-                Toast.makeText(this, getString(R.string.time_toast), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.time_toast), Toast.LENGTH_SHORT).show()  //"Odaberite vrijeme u buducnosti"
             }
         }
 
         timePicker.show(supportFragmentManager, "TIME_PICKER")
     }
 
-
+    //funkcija za azuriranje teksta na polju za datum i vrijeme
     private fun updateSelectedDateTextView(chosenDateTime: LocalDateTime) {
         chosenDateTime.let {
             val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.getDefault())
@@ -322,7 +295,7 @@ class ActivityNewTask : AppCompatActivity() {
     }
 
 
-
+    //funkcija za postavljanje notifikacije
     private fun scheduleNotification(taskID:String) {
         Log.d("vrijeme0", taskID)
         val loadedTasks= taskStorage.loadTasks().toMutableList()
@@ -333,12 +306,14 @@ class ActivityNewTask : AppCompatActivity() {
             putExtra("id", task.id)
         }
 
+        //postavljanje intenta za notifikaciju
         val pendingIntent = PendingIntent.getBroadcast(
             this,
             task.id.hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        //postavljanje alarma
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerAtMillis =
             task.getLocalDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -351,6 +326,57 @@ class ActivityNewTask : AppCompatActivity() {
 
         } catch (e: SecurityException) {
             Log.e("ActivityNewTask", "Cannot schedule exact alarms: ${e.message}")
+        }
+    }
+    //funkcija za stvaranje ili azuriranje zadatka
+    private fun makeTask(titleCondition: String, taskSizeCondition: Boolean){
+
+        if (titleCondition.isNotBlank() && taskSizeCondition) { //provjerava je li unesen naslov i je li broj zadataka manji od 30
+            val title = titleInput.text.toString().trim().capitalize(Locale.getDefault())
+            val description = descInput.text.toString().trim().capitalize(Locale.getDefault())
+            val priority = spinner.selectedItem.toString()
+
+            if (taskToEditID != null) { //ako se ureduje zadatak onda se azurira taj zadatak
+                val prevDate=taskList.find { it.id == taskToEditID }!!.date
+                taskToEdit!!.title = title
+                taskToEdit!!.description = description
+                taskToEdit!!.date = selectedDateTime!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                taskToEdit!!.priority = priority
+                taskToEdit!!.dateChanged = LocalDateTime.now().toString()  //postavlja se datum promjene
+
+                Log.d("provjera", "${taskToEdit!!.id}\n$taskToEditID")
+                val position = taskList.indexOfFirst { it.id == taskToEditID }
+                if(position != -1) {
+                    taskList[position] = taskToEdit!! //azurira se zadatak u listi
+                    Log.d("ActivityNewTaskEdit2", "Postoji")
+                }
+                //takeif provjerava je li datum u buducnosti jer se alarm postavlja cak i s proslim vremenom pa daje notifikaciju odmah
+                taskToSchedule=taskToEditID.takeIf{ LocalDateTime.parse(taskToEdit!!.date).isAfter(LocalDateTime.now()) && prevDate!=taskToEdit!!.date}
+                Log.d("ActivityNewTaskEdit", "Loaded tasks: $taskList")
+            } else {
+                //ako se stvara novi zadatak onda se stvara novi zadatak
+                val task = Task.createTask(title, description, selectedDateTime!!, priority/*, false, ""*/)
+                taskList.add(task)
+
+                taskToSchedule=task.id.takeIf{ LocalDateTime.parse(task.date).isAfter(LocalDateTime.now())}
+                Log.d("taskID", "${task.id}\n$taskToSchedule")
+            }
+
+            Log.d("taskID3", "$taskToSchedule")
+            taskStorage.saveTasks(taskList)  //sprema se lista zadataka
+
+            //ako je odabrano vrijeme u buducnosti onda se postavlja notifikacija
+            taskToSchedule?.let { scheduleNotification(it)
+                Log.d("taskID2", "$taskToSchedule")
+            }
+
+            switchScreens(this, ActivityAllTasks::class.java, true, null)
+        } else {
+            if(titleCondition.isBlank()) //ako nije unesen naslov onda se prikazuje toast
+                Toast.makeText(this, "Unesite naslov", Toast.LENGTH_SHORT).show()
+            if(!taskSizeCondition)  //ako je broj zadataka veci od 30 onda se prikazuje toast
+                Toast.makeText(this, "Najveci broj zadataka je 30!", Toast.LENGTH_SHORT).show()
+
         }
     }
 

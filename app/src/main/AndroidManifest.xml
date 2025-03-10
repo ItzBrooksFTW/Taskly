@@ -18,13 +18,21 @@
         <receiver android:name=".NotificationReceiver" />
         <activity
             android:name=".ActivityAllTasks"
-            android:exported="false" />
+            android:exported="false"
+
+            android:screenOrientation="userPortrait"
+
+            />
         <activity
             android:name=".ActivityNewTask"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="userPortrait"
+            />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="userPortrait"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

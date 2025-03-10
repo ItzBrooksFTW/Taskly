@@ -27,6 +27,8 @@
         <item name="customInputBackgroundColor">@color/customInputsColorDark</item>
         <item name="dayNightColor">#FFFFFF</item>
         <item name="textAppearanceBody1">@style/CustomTextAppearance</item>
+        <item name="textAppearanceTitleLarge">@style/CustomTextTitleAppearance</item>
+        <item name="borderColor">@color/borderColorDark</item>
     </style>
     <style name="CustomInputStyle">
         <item name="android:textColor">@color/textColorPrimaryDark</item>
@@ -34,6 +36,9 @@
         <item name="android:background">@drawable/rounded_border</item>
     </style>
     <style name="CustomTextAppearance" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    <style name="CustomTextTitleAppearance" parent="TextAppearance.MaterialComponents.Headline6">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 

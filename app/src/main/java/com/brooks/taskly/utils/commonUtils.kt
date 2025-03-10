@@ -31,6 +31,8 @@ import com.brooks.taskly.ActivityAllTasks
 import com.brooks.taskly.data.Task
 import java.time.Duration
 
+
+// provjerava dozvole za alarm i notifikacije
 fun checkForPerms(activity: Activity, registry: ActivityResultRegistry) {
     Log.d("checkForPerms", "Checking for permissions")
     val requestExactAlarmPermissionLauncher = registry.register(
@@ -69,7 +71,7 @@ fun checkForPerms(activity: Activity, registry: ActivityResultRegistry) {
 }
 
 
-
+// funkcija za promjenu ekrana
 fun switchScreens(
     activity1: Activity,
     activity2: Class<*>,
@@ -86,7 +88,7 @@ fun switchScreens(
     }
 
 }
-
+// funkcija za promjenu boje pozadine
 fun changeBackgroundColor(
 
     activity : View,
@@ -99,7 +101,7 @@ fun changeBackgroundColor(
     background?.setColor(color.toColorInt())
     activity.background = background
 }
-
+// funkcija za formatiranje datuma iz LocalDateTime u string
 fun formatDateTime(
     dateTime: LocalDateTime
 ): String {
@@ -107,7 +109,7 @@ fun formatDateTime(
     val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
     return dateTime.format(formatter)
 }
-
+// funkcija za animaciju pojavljivanja i nestajanja
 fun fadeInOut(view: View, show: Boolean) {
     if (show) {
         view.alpha = 0f
@@ -127,13 +129,15 @@ fun fadeInOut(view: View, show: Boolean) {
             })
     }
 }
+
+//uzima boju iz teme
 fun getThemeColor(context: Context, attribute: Int): Int {
     val typedValue = TypedValue()
     val theme = context.theme
     theme.resolveAttribute(attribute, typedValue, true)
     return typedValue.data
 }
-
+  // funkcija za provjeru liste
 fun checkList(context:Context) {
     val taskList: MutableList<Task> = TaskStorage(context).loadTasks().toMutableList()
     val emptyListWarning: TextView =(context as ActivityAllTasks).findViewById(R.id.emptyListWarning)
@@ -145,7 +149,7 @@ fun checkList(context:Context) {
     }
 
 }
-
+// funkcija za provjeru teme
 fun checkTheme(context:Context): Int{
     val sharedPreferences = context.getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
     val selectedTheme = sharedPreferences.getInt("selectedTheme", 0)
@@ -156,7 +160,7 @@ fun checkTheme(context:Context): Int{
     }
     return selectedTheme
 }
-
+ // funkcija za dobivanje razlike između trenutnog vremena i vremena zadatka
 fun getDifferenceFromNow(taskDate: String): String {
     val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
     val taskDateTime = LocalDateTime.parse(taskDate, formatter)

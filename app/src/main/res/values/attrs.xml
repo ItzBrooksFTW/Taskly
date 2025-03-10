@@ -2,5 +2,6 @@
 <resources>
     <attr name="customInputBackgroundColor" format="color"/>
     <attr name="dayNightColor" format="color"/>
+    <attr name="borderColor" format="color"/>
 
 </resources>

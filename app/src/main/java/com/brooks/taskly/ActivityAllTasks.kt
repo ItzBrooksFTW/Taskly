@@ -13,7 +13,6 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.Spinner
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -25,6 +24,7 @@ import com.brooks.taskly.utils.TaskStorage
 import com.brooks.taskly.utils.switchScreens
 import java.time.LocalDateTime
 import androidx.core.graphics.createBitmap
+import com.brooks.taskly.utils.checkList
 import com.brooks.taskly.utils.checkTheme
 
 
@@ -51,14 +51,7 @@ class ActivityAllTasks : AppCompatActivity() {
 
 
 
-        val emptyListWarning : TextView = findViewById(R.id.emptyListWarning)
-
-        if(taskList.isEmpty()){
-            emptyListWarning.visibility=View.VISIBLE
-        }
-        else{
-            emptyListWarning.visibility=View.GONE
-        }
+        checkList(this)  //provjerava je li lista prazna i prikazuje poruku ako je
 
 
         var sortOrder= true
@@ -122,14 +115,17 @@ class ActivityAllTasks : AppCompatActivity() {
 
 
         val spinnerSortBy: Spinner = findViewById(R.id.spinnerSorting)
-        val sortChoice = spinnerSortBy.selectedItem.toString()
+        val sortChoice = spinnerSortBy.selectedItemPosition
 
         Log.d("taskovi prije", "Loaded tasks: $taskList")
 
+        val priorityArray=resources.getStringArray(R.array.dropdown_values_priority)
+
         val priorityMap = mapOf(
-            "Niski" to 0,
-            "Srednji" to 1,
-            "Visoki" to 2
+            priorityArray[2] to 0, //niski prioritet
+            priorityArray[1] to 1,  //srednji prioritet
+            priorityArray[0] to 2    //visoki prioritet
+
         )
 
        val taskListCopy = taskList.map { it.copy() }.toMutableList()
@@ -138,7 +134,7 @@ class ActivityAllTasks : AppCompatActivity() {
 
 
 
-            "Po datumu" -> {
+            1 -> { //sortiranje po datumu
 
                 if (sortOrder) {
                     taskListCopy.sortedBy { LocalDateTime.parse(it.date) }.also{
@@ -150,7 +146,7 @@ class ActivityAllTasks : AppCompatActivity() {
                     }
                 }
             }
-            "Po prioritetu" -> {
+            2 -> { //sortiranje po prioritetu
                 if (sortOrder) {
                     taskListCopy.sortedBy { priorityMap[it.priority]?:0 }
                 } else {
@@ -158,7 +154,7 @@ class ActivityAllTasks : AppCompatActivity() {
                 }
             }
 
-            else -> {
+            else -> { //zadano sortiranje
                 Log.d("taskoviDefault", "Loaded tasks: $taskList")
                 taskStorage.loadTasks()
 
@@ -168,6 +164,8 @@ class ActivityAllTasks : AppCompatActivity() {
         taskAdapter.updateTasks(sortedTaskList)
     }
 
+
+    //funkcija za okretanje strelice
     private fun flipDrawable(context: Context, drawableId: Int, orientation: Boolean): Bitmap {
         val drawable = ContextCompat.getDrawable(context, drawableId) ?: return createBitmap(1, 1)
         val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
