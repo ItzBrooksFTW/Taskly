@@ -127,9 +127,9 @@ class MainActivity : AppCompatActivity() {
                         getString(R.string.about_app_github)
             )
 
-           setPadding(50, 20, 50, 20) // Add padding for readability
-            autoLinkMask = Linkify.WEB_URLS // Auto-detect URLs
-            movementMethod = LinkMovementMethod.getInstance() // Make links clickable
+           setPadding(50, 20, 50, 20)
+            autoLinkMask = Linkify.WEB_URLS
+            movementMethod = LinkMovementMethod.getInstance()
         }
 
         AlertDialog.Builder(this)
